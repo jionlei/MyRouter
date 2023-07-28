@@ -1,0 +1,71 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+
+plugins {
+    alias(libs.plugins.androidApplication) apply false
+    alias(libs.plugins.androidLibrary) apply false
+    // alias(libs.plugins.appExtension) apply true
+}
+
+
+apply from: "app_config.gradle"
+
+println 'root project > build.gradle'
+println "app_config_name -> " + rootProject.ext.username
+
+// 所有工程的build均被删除
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+}
+allprojects {
+
+    tasks.register("cleanBuildDir", Delete) { delete ->
+        delete "${projectDir}/build"
+        delete "${projectDir}/out"
+    }
+}
+
+
+
+rootProject.ext.modules = rootProject.getChildProjects()
+
+def setModuleListInProject() {
+    List<List<ProjectDependency>> moduleLists = []
+    allprojects.forEach { proj ->
+        // 找到所有project 依赖module
+        List<ProjectDependency> moduleList = proj.configurations.collectMany { Configuration configuration ->
+            // 先拉平 [[...],[...]]
+            configuration.allDependencies
+        }.findAll { Dependency dependency ->
+            // 只有是 module的集合 排除 project gradle
+            dependency instanceof ProjectDependency
+        }.collect {
+            it as ProjectDependency
+        }.unique()
+        moduleLists.add(moduleList)
+    }
+    moduleLists.forEach {
+        rootProject.ext.moduleList.addAll(it)
+    }
+
+    // 最后在做一次filter
+    rootProject.ext.moduleList.unique()
+
+    println  "Arouter" + rootProject.ext.moduleList
+}
+//    allprojects.forEach {
+//        proj ->
+//            final List<ProjectDependency> projectDependencies = proj.configurations.collectMany { Configuration configuration ->
+//                configuration.allDependencies
+//            }.findAll { Dependency dependency ->
+//                dependency instanceof ProjectDependency
+//            }.collect {
+//                it as ProjectDependency
+//                println it.name
+//            }.unique().collect()
+//    }
+
+//tasks.register('clean', Delete) {
+//    println "clean project"
+//    delete rootProject.buildDir
+//}

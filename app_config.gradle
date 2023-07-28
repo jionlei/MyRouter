@@ -1,0 +1,53 @@
+ext {
+    //是否是集成模式
+    isRelease = true
+
+    username = "lei"
+
+    // 定义一个包名，存放MyRouter APT生产的Java文件
+    packageNameForAPT = "customrouter_apt"
+
+
+    app_android = [
+            androidApplication       : libs.plugins.androidApplication.get().pluginId,
+            androidLibrary           : libs.plugins.androidLibrary.get().pluginId,
+            applicationId            : "com.example.myrouter",
+            compileSdk               : 33,
+            minSdk                   : 24,
+            targetSdk                : 33,
+            versionCode              : 1,
+            versionName              : "1.0",
+            testInstrumentationRunner: "androidx.test.runner.AndroidJUnitRunner"
+    ]
+    isApplicationOrLibrary = () -> {
+        if (isRelease) return app_android.androidLibrary else return app_android.androidApplication
+    }
+
+
+    app_plugin = [
+            applicationOrLibrary: isApplicationOrLibrary(),
+    ]
+
+    app_dependencies = [
+            "appcompat"       : libs.appcompat,
+            "material"        : libs.material,
+            "constraintlayout": libs.constraintlayout,
+            "junit"           : libs.junit,
+            "test.ext.junit"  : libs.androidx.test.ext.junit,
+            "espresso.core"   : libs.espresso.core,
+    ]
+
+    // 保存所有module
+   modules = [] // :app , :order .... [dependency]
+
+}
+
+List<ProjectDependency> moduleList = []
+
+String getApplicationOrLibrary() {
+    if (ext.isRelease) {
+        return rootProject.ext.app_android.androidApplication
+    } else {
+        return app_android.androidLibrary
+    }
+}

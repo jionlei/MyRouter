@@ -1,0 +1,76 @@
+apply plugin :rootProject.ext.app_plugin.applicationOrLibrary
+
+android.buildFeatures.buildConfig = true  //开启BuildConfig 否则buildConfigField无法生效
+
+android {
+    namespace 'com.example.order'
+    compileSdk rootProject.ext.app_android.compileSdk
+
+    defaultConfig {
+        if(!rootProject.ext.isRelease) {
+            applicationId rootProject.ext.app_android.applicationId
+        }
+        minSdk rootProject.ext.app_android.minSdk
+        targetSdk rootProject.ext.app_android.targetSdk
+        versionCode rootProject.ext.app_android.versionCode
+        versionName rootProject.ext.app_android.versionName
+        testInstrumentationRunner  rootProject.ext.app_android.testInstrumentationRunner
+        //这个方法接收三个非空的参数，第一个:确定值的类型；第二个:指定key的名字；第三个:传值(必须是String)
+        //为什么需要定义这个？因为src代码中有可能需要用到跨模块交互，如果是组件化模块显然不行
+        //切记:不能在android根节点，只能在defaultConfig或buildTypes/ release/debug节点下
+        // 自动在BuidlConfig类下生成
+        buildConfigField "boolean", "isRelease", String.valueOf(rootProject.ext.isRelease)
+
+        // MyRouter注解处理器需要识别的参数
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [moduleName: this.project.name,  // 模块的name
+                             packageNameForAPT: rootProject.ext.packageNameForAPT]  // 存放注解器生成的文件路径
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    sourceSets {
+        main {
+            // 如果是组件化模式，需要单独运行时
+            if(!isRelease) {
+                java {
+                    // debug 时 release 目录下文件不需要合并到主工程
+                    exclude '**/release/**'
+                }
+                manifest.srcFile 'src/main/AndroidManifest.xml'
+            } else {
+                // 如果是组件化模式，需要单独运行时
+                manifest.srcFile 'src/main/release/AndroidManifest.xml'
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+    if (rootProject.ext.isRelease) {
+        // 处理路由注解
+        implementation project(":annotation")
+        annotationProcessor project(":annotation-processor")
+       // implementation project(":annotation-processor")
+        implementation project(":router_api")
+    }
+
+    app_dependencies.each {k, v ->
+        // api方式引入，其他模块在引入common时才会生效
+        api v
+        println('引入依赖: ' + k + " -> " + v)
+    }
+}

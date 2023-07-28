@@ -1,0 +1,26 @@
+plugins {
+    id 'java-library'
+}
+
+
+dependencies {
+    implementation project(':annotation')
+    // 编译时期进行注解处理
+    annotationProcessor libs.auto.service
+    compileOnly libs.auto.service
+
+    // 帮助我们通过类调用的方式来生成Java代码[JavaPoet]
+    implementation libs.squareup.javapoet
+}
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation libs.auto.service
+    annotationProcessor libs.auto.service
+    implementation libs.squareup.javapoet
+    implementation project(':annotation')
+}

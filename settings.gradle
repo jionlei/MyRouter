@@ -1,0 +1,31 @@
+
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+    }
+    versionCatalogs {
+        config {
+           // from files('gradle/config.versions.toml')
+        }
+
+    }
+}
+println 'This is settings.gradle file'
+rootProject.name = "MyRouter"
+include ':app'
+include ':common'
+include ':order'
+include ':personal'
+include ':annotation'
+include ':router_api'
+include ':annotation-processor'
