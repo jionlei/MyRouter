@@ -1,12 +1,16 @@
 package com.example.annotation_processor.utils;
 
 import com.example.annotation.bean.RouterBean;
+import com.example.annotation_processor.config.ProcessorConfig;
+import com.squareup.javapoet.ClassName;
 
 import java.util.Map;
+import java.util.Set;
 
-import javax.tools.Diagnostic;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
 
-public class ProcessUtils {
+public class ProcessorUtils {
     public static boolean isEmpty(String str) {
         return str == null || str.length() == 0;
     }
@@ -16,7 +20,7 @@ public class ProcessUtils {
     }
 
     public static boolean checkPath(String path) throws IllegalArgumentException{
-        if (ProcessUtils.isEmpty(path) && !path.startsWith("/")) {
+        if (ProcessorUtils.isEmpty(path) && !path.startsWith("/")) {
             throw new IllegalArgumentException("@MyRouter group is illegal");
             //messager.printMessage(Diagnostic.Kind.ERROR, "@MyRouter path is illegal");
         }
@@ -51,4 +55,21 @@ public class ProcessUtils {
         }
         return true;
     }
+
+    public static boolean isEmpty(Set<? extends TypeElement> set) {
+        return set == null || set.size() == 0;
+    }
+
+    public static String handleClassName(String qualifiedName) {
+        String tmpName = qualifiedName;
+        if(isEmpty(tmpName)) return null;
+        if(tmpName.length() == 1) return tmpName.toUpperCase();
+        tmpName = tmpName.replace(".","_");
+        return  tmpName.substring(0,1).toUpperCase() + tmpName.substring(1) + ProcessorConfig.PARAMETER_FILE_NAME;
+    }
+
+
+//    public static String getActivityPackageName() {
+//        ClassName.get()
+//    }
 }

@@ -7,7 +7,7 @@ import android.util.Log;
 import android.util.LruCache;
 
 import com.example.annotation.bean.RouterBean;
-import com.example.annotation_processor.utils.ProcessUtils;
+import com.example.annotation_processor.utils.ProcessorUtils;
 
 import java.util.Map;
 
@@ -111,7 +111,7 @@ public class RouterManger {
     }
 
     public static BundleManager build(String path) {
-        String groupName = ProcessUtils.getGroupFromPath(path);
+        String groupName = ProcessorUtils.getGroupFromPath(path);
         //
         if (groupName.isEmpty()) throw new IllegalArgumentException("Group 参数不合法");
         getInstance().myRouter.setPath(path);

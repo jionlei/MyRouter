@@ -7,7 +7,7 @@ import static com.example.annotation_processor.config.ProcessorConfig.ROUTER_PAC
 import com.example.annotation.MyRouter;
 import com.example.annotation.bean.RouterBean;
 import com.example.annotation_processor.config.ProcessorConfig;
-import com.example.annotation_processor.utils.ProcessUtils;
+import com.example.annotation_processor.utils.ProcessorUtils;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -48,7 +48,7 @@ import javax.tools.Diagnostic;
 @AutoService(Processor.class)
 @SupportedAnnotationTypes(value = {ROUTER_PACKAGE_NAME}) // 表示我要处理那个注解
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
-@SupportedOptions({ProcessorConfig.MODULE_NAME, ProcessorConfig.APT_PACKAGE_NAME})
+@SupportedOptions({ProcessorConfig.MODULE_NAME, ProcessorConfig.KEY_APT_PACKAGE_NAME})
 public class MyRouterProcessor extends AbstractProcessor {
 
     private Filer mFiler;
@@ -88,7 +88,7 @@ public class MyRouterProcessor extends AbstractProcessor {
         //            }
         //        }
         moduleName = options.get(ProcessorConfig.MODULE_NAME);
-        aptPackageName = options.get(ProcessorConfig.APT_PACKAGE_NAME);
+        aptPackageName = options.get(ProcessorConfig.KEY_APT_PACKAGE_NAME);
         if (moduleName == null || aptPackageName == null) {
             messager.printMessage(Diagnostic.Kind.ERROR, "APT环境出错");
         } else {
@@ -110,7 +110,7 @@ public class MyRouterProcessor extends AbstractProcessor {
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnvironment) {
         //没有对应的注解需要处理
         if (annotations.isEmpty()) {
-            messager.printMessage(Diagnostic.Kind.NOTE, "没有发现被ARouter注解的类");
+            messager.printMessage(Diagnostic.Kind.NOTE, "没有发现被MyRouter注解的类");
             return false; // 标注注解处理器没有工作
         }
 
@@ -127,7 +127,7 @@ public class MyRouterProcessor extends AbstractProcessor {
             String className = element.getSimpleName().toString();
             messager.printMessage(Diagnostic.Kind.NOTE, "className = " + className);
 
-            // 获取被注解类的 ARouter group和 path
+            // 获取被注解类的 MyRouter group和 path
             MyRouter myRouter = element.getAnnotation(MyRouter.class);
             RouterBean routerBean = new RouterBean(myRouter.path(), myRouter.group());
             routerBean.setElement(element);
@@ -144,7 +144,7 @@ public class MyRouterProcessor extends AbstractProcessor {
             // 校验 path 和group
             if (handleRouterBean(routerBean)) {
                 List<RouterBean> list = groupPathMap.get(routerBean.getGroup());
-                if (ProcessUtils.isEmpty(groupPathMap)) {
+                if (ProcessorUtils.isEmpty(groupPathMap)) {
                     List<RouterBean> routerBeanList = new ArrayList<>();
                     routerBeanList.add(routerBean);
                     groupPathMap.put(routerBean.getGroup(), routerBeanList);
@@ -169,7 +169,7 @@ public class MyRouterProcessor extends AbstractProcessor {
     }
 
     private void createGroupPath(TypeElement groupType, TypeElement pathType) throws IOException {
-        if (ProcessUtils.isEmpty(groupPathMap) || ProcessUtils.isEmpty(groupClassMap)) {
+        if (ProcessorUtils.isEmpty(groupPathMap) || ProcessorUtils.isEmpty(groupClassMap)) {
             return;
         }
         // Class<? extends MyRouterPath>
@@ -221,7 +221,7 @@ public class MyRouterProcessor extends AbstractProcessor {
     }
 
     private void createPathFile(TypeElement pathType) throws IOException {
-        if (ProcessUtils.isEmpty(groupPathMap)) {
+        if (ProcessorUtils.isEmpty(groupPathMap)) {
             return;
         }
         /*
@@ -320,8 +320,8 @@ public class MyRouterProcessor extends AbstractProcessor {
 //         校验group Name 原则是 moduleName == groupName == path的首个/ ... / 中间的要一致
 //         考虑到group 可能为默认空参 因此在此条件下校验  moduleName == path的首个/ ... / 中间的要一致
 
-        String tmpGroup = ProcessUtils.getGroupFromPath(path);
+        String tmpGroup = ProcessorUtils.getGroupFromPath(path);
 
-        return ProcessUtils.handleGroupName(group, tmpGroup, moduleName, routerBean);
+        return ProcessorUtils.handleGroupName(group, tmpGroup, moduleName, routerBean);
     }
 }
